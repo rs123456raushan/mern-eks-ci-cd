@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: rs123456raushan/myapp-backend:latest
+    container_name: myapp-node-backend
+    command: node index.js
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+    env_file: ./backend/.env
+    environment:
+      - NODE_ENV=development
+      - MONGO_URI=mongodb://roshan:mongo123@mongo:27017/mernapp?authSource=admin
+    networks:
+      - app-network
+
+  mongo:
+    image: mongo:6
+    container_name: myapp-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: roshan
+      MONGO_INITDB_ROOT_PASSWORD: mongo123
+    volumes:
+      - data-volume:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: rs123456raushan/myapp-frontend:latest
+    container_name: myapp-react-frontend
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  data-volume:
